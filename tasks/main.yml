@@ -1,0 +1,4 @@
+---
+# tasks file for ansible-jenkins
+- include: 01-install.yml
+  tags: docker-mysql-install

@@ -1,0 +1,28 @@
+---
+- name: pull mysql-percona container
+  docker_image:
+    name: percona:latest
+  when: docker_installed is success
+
+- name: Create mount volume directories for persistent data
+  file: path={{ item.path }} state=directory mode="a+rw"
+  with_items:
+      - { path: '/opt/mysql-data' }
+      - { path: '/opt/mysql-logs' }
+
+- name: Run Percona
+  docker_container:
+    name: percona
+    image: percona:latest
+    restart_policy: unless-stopped
+    ports:
+     - "3306:3306"
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ MYSQL_ROOT_PASSWORD }}"
+      MYSQL_USER: "{{ MYSQL_USER }}"
+      MYSQL_PASSWORD: "{{ MYSQL_PASSWORD }}"
+      MYSQL_DATABASE: "{{ MYSQL_DATABASE }}"
+      RANCHER_NETWORK: true
+    volumes:
+      - /opt/mysql-data:/var/lib/mysql
+      - /opt/mysql-logs:/var/log/mysql
